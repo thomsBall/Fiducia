@@ -22,7 +22,12 @@ public class JobInterview {
         String jobToken = "11d840314d9ac1f512b9e68724c7c3af25";
 
 //        startJenkinsJob(jobname, jobToken);
-        createJob("http://localhost:8080/","Test","<project><builders/><publishers/><buildWrappers/></project>");
+        createJob("http://localhost:8080/","TestdersdseRRR22","<flow-definition plugin=\"workflow-job@2.32\">\n" +
+                "<keepDependencies>false</keepDependencies>\n" +
+                "<properties/>\n" +
+                "<triggers/>\n" +
+                "<disabled>false</disabled>\n" +
+                "</flow-definition>");
 
     }
 
