@@ -10,7 +10,7 @@ pipeline {
         }
         stage('Test') {
             steps {
-                run "C:/Jobintervie/Fiducia/src/test/java/UnitTest.java"
+                echo "Test"
 
             }
         }
