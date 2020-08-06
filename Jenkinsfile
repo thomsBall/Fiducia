@@ -2,20 +2,15 @@ pipeline {
     agent any
 
     stages {
-        stage('build') {
+        stage('Build') {
             steps {
-                echo "Build"
+                echo 'Building..'
             }
         }
-          stage('test') {
-                    steps {
-                        sh 'mvn --version'
-                    }
-                }
-            stage('checkout') {
-                      steps {
-                          sh 'mvn --version'
-                      }
-                  }
+        stage('Test') {
+            steps {
+                echo 'Testing..'
+            }
+        }
     }
 }
