@@ -10,7 +10,7 @@ pipeline {
         }
         stage('Test') {
             steps {
-                junit "C:/Jobintervie/Fiducia/src/test/java/UnitTest.java"
+                run "C:/Jobintervie/Fiducia/src/test/java/UnitTest.java"
 
             }
         }
