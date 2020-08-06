@@ -10,7 +10,7 @@ pipeline {
         }
         stage('Test') {
             steps {
-                echo 'Testing..'
+                junit "C:/Jobintervie/Fiducia/src/test/java"
 
             }
         }

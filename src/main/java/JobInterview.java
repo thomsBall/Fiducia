@@ -2,17 +2,15 @@
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
-import javax.swing.*;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,21 +35,21 @@ public class JobInterview {
 
 
 
-//            String name;
-//            JSONArray array = new JSONArray(string_of_json_array);
-//            for (int i = 0; i < array.length(); i++) {
-//                JSONObject row = array.getJSONObject(i);
-//                name = row.getString("name");
-//                System.out.println(name);
-//            }
-
-
-
-
     }
 
-    public static List<String> getAllJobs() {
-        List results = new ArrayList();
+    public static List<String> listSingleJobs() {
+        List<String> results = new ArrayList<>();
+        String jsonResult = getAllJobsToArray().toString();
+        JSONObject jsonObject = new JSONObject(jsonResult);
+        JSONArray jsonArray = jsonObject.getJSONArray("jobs");
+        for (int i = 0; i <jsonArray.length(); i++){
+            results.add(jsonArray.getJSONObject(i).getString("name"));
+        }
+        return results;
+    }
+
+    public static String getAllJobsToArray() {
+        String results = null;
         try {
             URL url = new URL("http://localhost:8080/api/json?tree=jobs[name,color]");
             String user = "thomsBall"; // username
@@ -69,7 +67,7 @@ public class JobInterview {
             String line;
             System.out.println("Done ::"  + connection.getResponseCode());
             while ((line = in.readLine()) != null) {
-                results.add(line);
+                results = line;
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -110,6 +108,10 @@ public class JobInterview {
     public static int createJob(String url, String newJobName, String configXML){
         if (!proofLowerCase(newJobName)){
             newJobName = newJobName.toLowerCase();
+            System.out.println("Dein Jobname wurde automatisch angepasst");
+        }if(listSingleJobs().contains(newJobName)){
+            System.out.println("Dein Jobname existiert bereits");
+            return -1;
         }
 
         Client client = Client.create();
