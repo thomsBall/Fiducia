@@ -1,0 +1,16 @@
+<component name="libraryTable">
+  <library name="libs">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../../Selenium/client-combined-3.141.59.jar!/" />
+      <root url="file://$PROJECT_DIR$" />
+      <root url="file://$PROJECT_DIR$/../../Selenium/libs" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/../../Selenium/client-combined-3.141.59-sources.jar!/" />
+      <root url="file://$PROJECT_DIR$/src/main/java" />
+      <root url="file://$PROJECT_DIR$/src/test/java" />
+    </SOURCES>
+    <jarDirectory url="file://$PROJECT_DIR$/../../Selenium/libs" recursive="false" />
+  </library>
+</component>
