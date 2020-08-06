@@ -11,6 +11,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,25 +20,25 @@ public class JobInterview {
 
     public static void main(String[] args) throws IOException, InterruptedException {
 
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Bitte gib einen Jobnamen ein");
+        String jobname = sc.nextLine();
+        sc.close();
 
-        String jobname = "FIDUCIA_Jobinterview";
-        String jobToken = "11d840314d9ac1f512b9e68724c7c3af25";
+        if(proofOfContainingJob(jobname, singleJobList())){
+            createJob("http://localhost:8080/",jobname,
+                    "<flow-definition plugin=\"workflow-job@2.32\">\n" +
+                            "<keepDependencies>false</keepDependencies>\n" +
+                            "<properties/>\n" +
+                            "<triggers/>\n" +
+                            "<disabled>false</disabled>\n" +
+                            "</flow-definition>");
 
-//        startJenkinsJob(jobname, jobToken);
-//        createJob("http://localhost:8080/","ConfigXML",
-//                "<flow-definition plugin=\"workflow-job@2.32\">\n" +
-//                "<keepDependencies>false</keepDependencies>\n" +
-//                "<properties/>\n" +
-//                "<triggers/>\n" +
-//                "<disabled>false</disabled>\n" +
-//                "</flow-definition>");
-
-
-
+        }
 
     }
 
-    public static List<String> listSingleJobs() {
+    public static List<String> singleJobList() {
         List<String> results = new ArrayList<>();
         String jsonResult = getAllJobsToArray().toString();
         JSONObject jsonObject = new JSONObject(jsonResult);
@@ -65,7 +66,7 @@ public class JobInterview {
             InputStream content = connection. getInputStream();
             BufferedReader in = new BufferedReader(new InputStreamReader(content));
             String line;
-            System.out.println("Done ::"  + connection.getResponseCode());
+//            System.out.println("Done ::"  + connection.getResponseCode());
             while ((line = in.readLine()) != null) {
                 results = line;
             }
@@ -77,9 +78,9 @@ public class JobInterview {
 
     private static void startJenkinsJob(String jobname, String jobToken) {
         try {
-            URL url = new URL("http://localhost:8080/job/"+ jobname+ "/build"); // Jenkins URL localhost:8080, job named 'test'
+            URL url = new URL("http://localhost:8080/job/"+ jobname+ "/build");
             String user = "thomsBall"; // username
-            String pass = jobToken; // password or API token
+            String pass = jobToken;
             String authStr = user + ":" + pass;
             String encoding = Base64.getEncoder().encodeToString(authStr.getBytes("utf-8"));
 
@@ -90,14 +91,11 @@ public class JobInterview {
             InputStream content = connection.getInputStream();
             BufferedReader in = new BufferedReader(new InputStreamReader(content));
             String line;
-            System.out.println("Done ::"  + connection.getResponseCode());
+//            System.out.println("Done ::"  + connection.getResponseCode());
             JSONObject json = new JSONObject();
 
             while ((line = in.readLine()) != null) {
                 json.put("jenkins",line);
-
-//                System.out.println(line);
-                System.out.println(json.getString("name"));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -109,19 +107,23 @@ public class JobInterview {
         if (!proofLowerCase(newJobName)){
             newJobName = newJobName.toLowerCase();
             System.out.println("Dein Jobname wurde automatisch angepasst");
-        }if(listSingleJobs().contains(newJobName)){
-            System.out.println("Dein Jobname existiert bereits");
-            return -1;
         }
-
         Client client = Client.create();
 		client.addFilter(new com.sun.jersey.api.client.filter.HTTPBasicAuthFilter("thomsball", "118991e91fb6077e1782904753f0f720f1"));
         WebResource webResource = client.resource(url+"/createItem?name="+newJobName);
         ClientResponse response = webResource.type("application/xml").post(ClientResponse.class, configXML);
         String jsonResponse = response.getEntity(String.class);
         client.destroy();
-        System.out.println("Response createJob:::::"+ jsonResponse);
+//        System.out.println("Response createJob:::::"+ jsonResponse);
         return response.getStatus();
+    }
+
+    private static boolean proofOfContainingJob(String newJobName, List<String> jobList) {
+        if(jobList.contains(newJobName)){
+            System.out.println("Dein Jobname existiert bereits");
+            return false;
+        }
+        return true;
     }
 
     public static boolean proofLowerCase(String jobname){
@@ -129,71 +131,6 @@ public class JobInterview {
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(jobname);
         return matcher.matches();
-    }
-
-
-    public static boolean kmpSearch(String pat, String txt) {
-        int M = pat.length();
-        int N = txt.length();
-
-        int lps[] = new int[M];
-        int j = 0; // index for pat[]
-        int foundPatternNumb = 0;
-
-        computeLPSArray(pat, M, lps);
-        boolean wert = false;
-        int i = 0; // index for txt[]
-        while (i < N) {
-            if (pat.charAt(j) == txt.charAt(i)) {
-                j++;
-                i++;
-            }
-            if (j == M) {
-                wert = true;
-                foundPatternNumb++;
-
-                System.out.println(wert);
-                System.out.println("Found pattern "
-                        + "at index " + (i - j));
-                j = lps[j - 1];
-            }
-
-            else if (i < N && pat.charAt(j) != txt.charAt(i)) {
-                if (j != 0)
-                    j = lps[j - 1];
-                else
-                    i = i + 1;
-            }
-        }
-        return wert;
-    }
-
-    public static void computeLPSArray(String pat, int M, int lps[]) {
-
-        int len = 0;
-        int i = 1;
-        lps[0] = 0; // lps[0] is always 0
-
-        while (i < M) {
-            if (pat.charAt(i) == pat.charAt(len)) {
-                len++;
-                lps[i] = len;
-                i++;
-            } else // (pat[i] != pat[len])
-            {
-
-                if (len != 0) {
-                    len = lps[len - 1];
-
-                    // Also, note that we do not increment
-                    // i here
-                } else // if (len == 0)
-                {
-                    lps[i] = len;
-                    i++;
-                }
-            }
-        }
     }
 
 }

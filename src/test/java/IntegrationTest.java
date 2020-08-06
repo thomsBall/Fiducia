@@ -21,8 +21,8 @@ public class IntegrationTest{
 
     }
 
-    public boolean proofContainingJob (List<String> jobList, String jobname){
-        for(String results : JobInterview.listSingleJobs())
+    public boolean proofOfContainingJobList (List<String> jobList, String jobname){
+        for(String results : jobList)
             if(results.equals(jobname)){
                 return true;
             }
@@ -41,8 +41,8 @@ public class IntegrationTest{
                 "</flow-definition>");
 
 
-        assertTrue(proofContainingJob(JobInterview.listSingleJobs(), "integrationtest"));
-        assertFalse(proofContainingJob(JobInterview.listSingleJobs(), "IntegrationTest"));
+        assertTrue(proofOfContainingJobList(JobInterview.singleJobList(), "integrationtest"));
+        assertFalse(proofOfContainingJobList(JobInterview.singleJobList(), "IntegrationTest"));
 
 
     }
