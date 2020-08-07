@@ -18,37 +18,60 @@ import java.util.regex.Pattern;
 public class JobInterview {
 
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) {
 
         Scanner sc = new Scanner(System.in);
-        System.out.println("Bitte gib einen Jobnamen ein");
-        String jobname = sc.nextLine();
-        sc.close();
+        boolean flag = true;
+        while(flag){
+            System.out.println("Bitte gib einen Jobnamen eingeben der nur aus Zahlen und Kleinbuchstaben besteht. Sonderzeichen dürfen nicht verwendet werden");
+            String jobname = sc.nextLine();
 
-        if(proofOfContainingJob(jobname, singleJobList())){
-            createJob("http://localhost:8080/",jobname,
-                    "<flow-definition plugin=\"workflow-job@2.32\">\n" +
-                            "<keepDependencies>false</keepDependencies>\n" +
-                            "<properties/>\n" +
-                            "<triggers/>\n" +
-                            "<disabled>false</disabled>\n" +
-                            "</flow-definition>");
-
+            if(proofOfContainingJob(jobname.toLowerCase(), singleJobList(getAllJobsToArray())) & proofCorrectChars(jobname)){
+                createJob("http://localhost:8080/",jobname,
+                        "<flow-definition plugin=\"workflow-job@2.32\">\n" +
+                                "<keepDependencies>false</keepDependencies>\n" +
+                                "<properties/>\n" +
+                                "<triggers/>\n" +
+                                "<disabled>false</disabled>\n" +
+                                "</flow-definition>");
+                flag = false;
+                sc.close();
+            }
         }
-
     }
 
-    public static List<String> singleJobList() {
-        List<String> results = new ArrayList<>();
-        String jsonResult = getAllJobsToArray().toString();
-        JSONObject jsonObject = new JSONObject(jsonResult);
-        JSONArray jsonArray = jsonObject.getJSONArray("jobs");
-        for (int i = 0; i <jsonArray.length(); i++){
-            results.add(jsonArray.getJSONObject(i).getString("name"));
+    //Prüfen ob Job bereits existiert
+    public static boolean proofOfContainingJob(String newJobName, List<String> jobList) {
+        if(jobList.contains(newJobName)){
+            System.out.println("Dein Jobname existiert bereits");
+            return false;
         }
-        return results;
+        return true;
     }
 
+    //Prüfen ob keine Sonderzeichen in dem Namen enthalten sind
+    public static boolean proofCorrectChars(String jobname){
+        String regex = "^[a-z0-9]+$";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(jobname.toLowerCase());
+        if(matcher.matches()){
+            return true;
+        }else {
+            System.out.println("Dein Jobname enthält verbotene Zeichen");
+            return false;
+        }
+    }
+
+    //Prüfen ob der Name klein geschrieben ist
+    public static boolean proofLowerCase(String jobname){
+        String regex = "^[a-z]+$";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(jobname);
+        return matcher.matches();
+    }
+
+
+    //Schreibt alle Jobs in ein String
     public static String getAllJobsToArray() {
         String results = null;
         try {
@@ -76,6 +99,36 @@ public class JobInterview {
         return results;
     }
 
+    //Erstellt einzelne Strings aus JSON
+    public static List<String> singleJobList(String getAllJobs) {
+        List<String> results = new ArrayList<>();
+        String jsonResult = getAllJobs;
+        JSONObject jsonObject = new JSONObject(jsonResult);
+        JSONArray jsonArray = jsonObject.getJSONArray("jobs");
+        for (int i = 0; i <jsonArray.length(); i++){
+            results.add(jsonArray.getJSONObject(i).getString("name"));
+        }
+        return results;
+    }
+
+    //Erstellen des Jenkins Jobs
+    public static int createJob(String url, String newJobName, String configXML){
+        if (!proofLowerCase(newJobName)){
+            newJobName = newJobName.toLowerCase();
+            System.out.println("Dein Jobname wurde automatisch angepasst");
+        }
+        Client client = Client.create();
+		client.addFilter(new com.sun.jersey.api.client.filter.HTTPBasicAuthFilter("thomsball", "118991e91fb6077e1782904753f0f720f1"));
+        WebResource webResource = client.resource(url+"/createItem?name="+newJobName);
+        ClientResponse response = webResource.type("application/xml").post(ClientResponse.class, configXML);
+        String jsonResponse = response.getEntity(String.class);
+        client.destroy();
+//        System.out.println("Response createJob:::::"+ jsonResponse);
+        System.out.println("Dein Job wurde erfolgreich erstellt");
+        return response.getStatus();
+    }
+
+    //Starten des Jenkins Job
     private static void startJenkinsJob(String jobname, String jobToken) {
         try {
             URL url = new URL("http://localhost:8080/job/"+ jobname+ "/build");
@@ -100,37 +153,6 @@ public class JobInterview {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-    //
-
-    public static int createJob(String url, String newJobName, String configXML){
-        if (!proofLowerCase(newJobName)){
-            newJobName = newJobName.toLowerCase();
-            System.out.println("Dein Jobname wurde automatisch angepasst");
-        }
-        Client client = Client.create();
-		client.addFilter(new com.sun.jersey.api.client.filter.HTTPBasicAuthFilter("thomsball", "118991e91fb6077e1782904753f0f720f1"));
-        WebResource webResource = client.resource(url+"/createItem?name="+newJobName);
-        ClientResponse response = webResource.type("application/xml").post(ClientResponse.class, configXML);
-        String jsonResponse = response.getEntity(String.class);
-        client.destroy();
-//        System.out.println("Response createJob:::::"+ jsonResponse);
-        return response.getStatus();
-    }
-
-    private static boolean proofOfContainingJob(String newJobName, List<String> jobList) {
-        if(jobList.contains(newJobName)){
-            System.out.println("Dein Jobname existiert bereits");
-            return false;
-        }
-        return true;
-    }
-
-    public static boolean proofLowerCase(String jobname){
-        String regex = "^[a-z0-9]+$";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(jobname);
-        return matcher.matches();
     }
 
 }
