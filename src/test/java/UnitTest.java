@@ -14,10 +14,10 @@ public class UnitTest {
     @Test
     public void testLowerCase(){
 
-        assertTrue(JobInterview.proofLowerCase("test123"));
+        assertTrue(JobInterview.proofLowerCase("test"));
         assertTrue(JobInterview.proofLowerCase("test"));
         assertFalse(JobInterview.proofLowerCase("Test"));
-        assertFalse(JobInterview.proofLowerCase("TeS44!"));
+        assertFalse(JobInterview.proofLowerCase("TeST"));
 
     };
 
@@ -34,7 +34,7 @@ public class UnitTest {
     @Test
     public void testSingleJobList(){
 
-        String jsonMock = "{jobs:[{name:Test1}, {name:Test2}]}";
+        String jsonMock = "{jobs:[{name:TestSingleJobList1}, {name:TestSingleJobList2}]}";
         List<String> results = new ArrayList<>();
         results.add("TestSingleJobList1");
         results.add("TestSingleJobList2");
